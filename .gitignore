@@ -1,0 +1,6 @@
+/.bloop/
+/project/hydra.sbt
+/project/metals.sbt
+/project/project/
+/project/target/
+/target/

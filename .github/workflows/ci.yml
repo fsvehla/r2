@@ -1,0 +1,52 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: unit tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:11.6-alpine
+        env:
+          POSTGRES_USER:     'r2_tests'
+          POSTGRES_PASSWORD: '12345'
+          POSTGRES_DB:       'r2_tests'
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - uses: olafurpg/setup-scala@v7
+      with:
+        java-version: adopt@1.11
+
+    - name: Cache Coursier
+      uses: actions/cache@v1
+      with:
+        path: ~/.cache/coursier/v1
+        key: ${{ runner.os }}-sbt-coursier-cache-${{ hashFiles('**/build.sbt') }}
+        restore-keys: |
+          ${{ runner.os }}-coursier-
+
+    - name: Cache SBT build files
+      uses: actions/cache@v1
+      with:
+        path: ~/.sbt
+        key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+        restore-keys: |
+          ${{ runner.os }}-sbt-
+
+    - name: Run tests
+      run: csbt test
+      env:
+        R2_TEST_POSTGRES_HOST:     '127.0.0.1'
+        R2_TEST_POSTGRES_PORT:     '5432'
+        R2_TEST_POSTGRES_USERNAME: 'r2_tests'
+        R2_TEST_POSTGRES_PASSWORD: '12345'
+        R2_TEST_POSTGRES_DATABASE: 'r2_tests'
