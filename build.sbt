@@ -20,7 +20,7 @@ lazy val r2 = project
   )
 
 lazy val commonSettings = Vector(
-  scalaVersion := "2.13.2",
+  scalaVersion := "2.13.1",
   scalacOptions ++= Vector(
     "-deprecation",
     "-encoding",
